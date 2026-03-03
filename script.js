@@ -1,7 +1,5 @@
-// Get users from local storage or create empty array
-let users = JSON.parse(localStorage.getItem("users")) || [];
 
-// ================= REGISTER =================
+let users = JSON.parse(localStorage.getItem("users")) || [];
 function register() {
 
     let username = document.getElementById("signupUsername").value;
@@ -29,9 +27,6 @@ function register() {
     // Redirect to dashboard
     window.location.href = "dashboard.html";
 }
-
-
-// ================= LOGIN =================
 function login() {
 
     let input = document.getElementById("loginUser").value;
@@ -52,10 +47,6 @@ function login() {
     }
 
     document.getElementById("message").innerHTML = "Invalid login details!";
-}
-
-
-// ================= DASHBOARD =================
 function loadDashboard() {
 
     let user = localStorage.getItem("loggedInUser");
