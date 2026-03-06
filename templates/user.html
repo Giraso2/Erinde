@@ -57,20 +57,21 @@ body {
 <!-- Sidebar -->
 <div class="col-md-3 col-lg-2 sidebar">
     <h4>User Panel</h4>
-    <a href="#">Dashboard</a>
+    <a href="/user">Dashboard</a>
+    <a href="#">location</a>
     <a href="#">Near Hospitals</a>
     <a href="#">Doctors</a>
     <a href="#">Book Appointment</a>
     <a href="#">My Appointments</a>
     <a href="#">History</a>
-    <a href="#">Logout</a>
+    <a href="/logout" style="color: #08153b; margin-top: bottom: ;; padding-top: 30px;">Logout</a>
     
 </div>
 
 <!-- Main Content -->
 <div class="col-md-9 col-lg-10 content">
 
-    <h2 class="mb-4">Welcome User 👋</h2>
+    <h2 class="mb-4">Welcome {{ user }} 👋</h2>
 
     <div class="row">
 

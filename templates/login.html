@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthCare System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+html, body{
+height:100vh;
+margin:0;
+padding:0;
+}
+
+body{
+display:flex;
+align-items:center;
+justify-content:center;
+background: url('https://images.unsplash.com/photo-1576091160550-112173e7f5b0?w=1200&q=80') center/cover no-repeat;
+background-attachment: fixed;
+background-color: #f3f6f8;
+font-family:Arial;
+}
+
+.container-box{
+background:white;
+border-radius:10px;
+overflow:hidden;
+display:flex;
+width:800px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* left description */
+.info{
+background:#031127;
+color:white;
+padding:40px;
+width:50%;
+}
+
+.info h2{
+margin-bottom:20px;
+}
+
+/* right form */
+.form-area{
+padding:40px;
+width:50%;
+background: url('https://images.unsplash.com/photo-1576091160550-112173e7f5b0?w=1200&q=80') center/cover no-repeat;
+background-attachment: fixed;
+background-color: rgba(255,255,255,0.95);
+}
+
+.tabs button{
+border:none;
+background:none;
+font-weight:bold;
+margin-right:20px;
+}
+
+.tabs button.active{
+color:#0d6efd;
+}
+
+input{
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container-box">
+
+<!-- LEFT DESCRIPTION -->
+<div class="info">
+
+<h2>Smart Health Appointment System</h2>
+
+<p>
+This system helps citizens easily find hospitals, book doctor appointments,
+and manage their medical visits online.
+</p>
+
+<p>
+✔ Find nearby hospitals  
+✔ Speak with doctors  
+✔ Book appointments  
+✔ Track your health history
+</p>
+
+</div>
+
+
+<!-- RIGHT LOGIN/SIGNUP -->
+<div class="form-area">
+
+<h3 class="mb-3">Login Form</h3>
+
+<div class="tabs mb-3">
+<button onclick="showLogin()" class="active" id="loginTab">Login</button>
+<button onclick="showSignup()" id="signupTab">Signup</button>
+</div>
+
+
+<!-- LOGIN -->
+<form id="loginForm" action="/login" method="POST">
+
+<input type="email" class="form-control" name="email" placeholder="Email Address" required>
+
+<input type="password" class="form-control" name="password" placeholder="Password" required>
+
+<button class="btn btn-primary w-100 mt-2">Login</button>
+
+</form>
+
+
+<!-- SIGNUP -->
+<form id="signupForm" action="/signup" method="POST" style="display:none;">
+
+<input type="text" class="form-control" name="name" placeholder="Full Name" required>
+
+<input type="email" class="form-control" name="email" placeholder="Email Address" required>
+
+<input type="password" class="form-control" name="password" placeholder="Password" required>
+
+<button class="btn btn-success w-100 mt-2">Signup</button>
+
+</form>
+
+</div>
+</div>
+
+
+<script>
+
+function showSignup(){
+
+document.getElementById("signupForm").style.display="block"
+document.getElementById("loginForm").style.display="none"
+
+document.getElementById("signupTab").classList.add("active")
+document.getElementById("loginTab").classList.remove("active")
+
+}
+
+function showLogin(){
+
+document.getElementById("signupForm").style.display="none"
+document.getElementById("loginForm").style.display="block"
+
+document.getElementById("loginTab").classList.add("active")
+document.getElementById("signupTab").classList.remove("active")
+
+}
+
+</script>
+
+</body>
+</html>

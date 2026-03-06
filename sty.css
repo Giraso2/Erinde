@@ -1,0 +1,145 @@
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background-color:#58667b;
+}
+
+
+.container-login{
+    display:flex;
+    height:100vh;
+}
+
+
+.left-side{
+    width:50%;
+    background: linear-gradient(135deg,#8fb1e3,#c7a3e6);
+    color:white;
+    padding:80px;
+}
+
+.left-side h1{
+    font-size:40px;
+}
+
+.left-side p{
+    margin-top:20px;
+    line-height:1.6;
+}
+
+.left-side ul{
+    margin-top:20px;
+}
+
+
+/* RIGHT LOGIN AREA */
+
+.right-side{
+    width:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+/* LOGIN CARD */
+
+.form-box{
+    background:white;
+    padding:40px;
+    border-radius:12px;
+    width:320px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+/* TABS */
+
+.tabs button{
+    padding:10px;
+    margin:5px;
+    border:none;
+    background:#08162a;
+    color:white;
+    cursor:pointer;
+    border-radius:6px;
+}
+
+/* INPUTS */
+
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+/* BUTTON */
+
+button{
+    padding:10px;
+    width:100%;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* Hide signup form first */
+
+#signupForm{
+    display:none;
+}
+
+
+/* ===== DASHBOARD STYLE ===== */
+
+.sidebar{
+    height:100vh;
+    background:#1e1e2f;
+    color:white;
+    padding-top:20px;
+}
+
+.sidebar h4{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.sidebar a{
+    display:block;
+    color:#ccc;
+    padding:12px 20px;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    background:#081324;
+    color:white;
+}
+
+/* MAIN CONTENT */
+
+.content{
+    padding:30px;
+}
+
+/* CARDS */
+
+.card{
+    border:none;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* LEFT SIDE BACKGROUND IMAGE */
+
+.left-side{
+    background: url('images/hospital-image.jpg') center/cover no-repeat;
+    
+
+    
+}
