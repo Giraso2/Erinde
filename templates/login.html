@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HealthCare System</title>
+<title>Erinde – National Smart Health Access</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -81,18 +81,17 @@ margin-bottom:10px;
 <!-- LEFT DESCRIPTION -->
 <div class="info">
 
-<h2>Smart Health Appointment System</h2>
-
-<p>
-This system helps citizens easily find hospitals, book doctor appointments,
-and manage their medical visits online.
+<h2>🏥 Erinde</h2>
+<h4 style="color:#8ecae6;font-size:16px;">National Smart Health Access & Flow Infrastructure</h4>
+<p style="margin-top:16px;">
+Rwanda's national digital health infrastructure — book appointments, pay via mobile money,
+and track queues in real-time. Works on every phone, including basic feature phones via *880#.
 </p>
-
 <p>
-✔ Find nearby hospitals  
-✔ Speak with doctors  
-✔ Book appointments  
-✔ Track your health history
+✔ Book appointments via USSD or web<br>
+✔ Pay with Mobile Money (MTN / Airtel)<br>
+✔ Real-time queue tracking<br>
+✔ Find & compare hospital loads
 </p>
 
 </div>
@@ -101,38 +100,32 @@ and manage their medical visits online.
 <!-- RIGHT LOGIN/SIGNUP -->
 <div class="form-area">
 
-<h3 class="mb-3">Login Form</h3>
+<h3 class="mb-3">Erinde Access</h3>
 
 <div class="tabs mb-3">
 <button onclick="showLogin()" class="active" id="loginTab">Login</button>
 <button onclick="showSignup()" id="signupTab">Signup</button>
 </div>
 
+<div id="authError" style="color:#ef476f;font-size:13px;margin-bottom:8px;display:none;"></div>
 
 <!-- LOGIN -->
-<form id="loginForm" action="/login" method="POST">
-
-<input type="email" class="form-control" name="email" placeholder="Email Address" required>
-
-<input type="password" class="form-control" name="password" placeholder="Password" required>
-
-<button class="btn btn-primary w-100 mt-2">Login</button>
-
-</form>
+<div id="loginForm">
+<input type="email" class="form-control" id="loginEmail" placeholder="Email Address" required>
+<input type="password" class="form-control" id="loginPassword" placeholder="Password" required>
+<button class="btn btn-primary w-100 mt-2" onclick="handleLogin()">Login</button>
+<small class="text-muted d-block mt-2">Demo: demo@erinde.rw / demo123</small>
+</div>
 
 
 <!-- SIGNUP -->
-<form id="signupForm" action="/signup" method="POST" style="display:none;">
-
-<input type="text" class="form-control" name="name" placeholder="Full Name" required>
-
-<input type="email" class="form-control" name="email" placeholder="Email Address" required>
-
-<input type="password" class="form-control" name="password" placeholder="Password" required>
-
-<button class="btn btn-success w-100 mt-2">Signup</button>
-
-</form>
+<div id="signupForm" style="display:none;">
+<input type="text" class="form-control" id="signupName" placeholder="Full Name" required>
+<input type="email" class="form-control" id="signupEmail" placeholder="Email Address" required>
+<input type="password" class="form-control" id="signupPassword" placeholder="Password" required>
+<input type="tel" class="form-control" id="signupPhone" placeholder="Phone (+250...)">
+<button class="btn btn-success w-100 mt-2" onclick="handleSignup()">Signup</button>
+</div>
 
 </div>
 </div>
@@ -141,23 +134,71 @@ and manage their medical visits online.
 <script>
 
 function showSignup(){
-
-document.getElementById("signupForm").style.display="block"
-document.getElementById("loginForm").style.display="none"
-
-document.getElementById("signupTab").classList.add("active")
-document.getElementById("loginTab").classList.remove("active")
-
+    document.getElementById("signupForm").style.display="block"
+    document.getElementById("loginForm").style.display="none"
+    document.getElementById("signupTab").classList.add("active")
+    document.getElementById("loginTab").classList.remove("active")
+    document.getElementById("authError").style.display="none"
 }
 
 function showLogin(){
+    document.getElementById("signupForm").style.display="none"
+    document.getElementById("loginForm").style.display="block"
+    document.getElementById("loginTab").classList.add("active")
+    document.getElementById("signupTab").classList.remove("active")
+    document.getElementById("authError").style.display="none"
+}
 
-document.getElementById("signupForm").style.display="none"
-document.getElementById("loginForm").style.display="block"
+function showError(msg) {
+    const el = document.getElementById("authError")
+    el.textContent = msg
+    el.style.display = "block"
+}
 
-document.getElementById("loginTab").classList.add("active")
-document.getElementById("signupTab").classList.remove("active")
+async function handleLogin() {
+    const email = document.getElementById("loginEmail").value.trim()
+    const password = document.getElementById("loginPassword").value.trim()
+    if (!email || !password) { showError("Please fill all fields"); return }
 
+    try {
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        })
+        const data = await res.json()
+        if (!res.ok) { showError(data.error); return }
+
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("user", JSON.stringify(data.user))
+        window.location.href = "/dashboard"
+    } catch (e) {
+        showError("Connection error. Is the server running?")
+    }
+}
+
+async function handleSignup() {
+    const name = document.getElementById("signupName").value.trim()
+    const email = document.getElementById("signupEmail").value.trim()
+    const password = document.getElementById("signupPassword").value.trim()
+    const phone = document.getElementById("signupPhone").value.trim()
+    if (!name || !email || !password) { showError("Name, email, and password required"); return }
+
+    try {
+        const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password, phone })
+        })
+        const data = await res.json()
+        if (!res.ok) { showError(data.error); return }
+
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("user", JSON.stringify(data.user))
+        window.location.href = "/dashboard"
+    } catch (e) {
+        showError("Connection error. Is the server running?")
+    }
 }
 
 </script>

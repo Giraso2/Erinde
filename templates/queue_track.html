@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Queue Tracking – Erinde</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root { --dark: #1a1a2e; --accent: #00b4d8; }
+body { background: #f0f2f5; font-family: 'Segoe UI', system-ui, sans-serif; }
+.topbar {
+    background: var(--dark); color: white; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.topbar .brand { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; }
+.topbar .brand i { font-size: 28px; color: var(--accent); }
+.hospital-card {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e9ecef;
+    cursor: pointer; transition: 0.2s; height: 100%;
+}
+.hospital-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.hospital-card.active { border-color: var(--accent); background: #f0faff; }
+.queue-display {
+    background: var(--dark); color: white; border-radius: 16px; padding: 24px;
+    text-align: center;
+}
+.queue-display .number { font-size: 56px; font-weight: 800; line-height: 1; }
+.queue-display .label { font-size: 14px; color: #8ecae6; }
+.queue-bar {
+    height: 12px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 4px 0;
+}
+.queue-bar .fill { height: 100%; border-radius: 10px; transition: width 0.5s; }
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06d6a0; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <i class="bi bi-heart-pulse-fill"></i> Erinde <span style="font-size:14px;font-weight:400;color:#8ecae6;">| Live Queue</span>
+    </div>
+    <div>
+        <span class="badge bg-success me-2"><span class="live-dot me-1"></span>Live</span>
+        <a href="/dashboard" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<div class="container-fluid py-4 px-4">
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <h4 class="mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Real-Time Hospital Queue Tracking</h4>
+            <small class="text-muted">Live queue status across all health facilities. Updates every 3 seconds.</small>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4" id="hospitalGrid"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card-panel bg-white rounded-4 p-4 shadow-sm border" id="queueDetail">
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-hand-index-thumb" style="font-size:48px;"></i>
+                    <h5 class="mt-2">Select a hospital above</h5>
+                    <p>Click any hospital card to view real-time queue details</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-panel bg-white rounded-4 p-4 shadow-sm border">
+                <h5 class="mb-3"><i class="bi bi-journal-text me-2 text-primary"></i>Queue Information</h5>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="live-dot"></span>
+                    <span class="fw-bold text-success">Live</span>
+                    <span class="text-muted">| Auto-refresh every 3s</span>
+                </div>
+                <hr>
+                <h6>How It Works</h6>
+                <ol class="small text-muted">
+                    <li>Patients join the queue via USSD <strong>*880#</strong> or web</li>
+                    <li>Queue numbers are assigned in real-time</li>
+                    <li>Patients are served on a first-come, first-served basis</li>
+                    <li>Estimated wait time updates dynamically</li>
+                    <li>Patients receive SMS notification when their turn approaches</li>
+                </ol>
+                <hr>
+                <h6>Capacity Legend</h6>
+                <div class="d-flex gap-3 small">
+                    <span><span class="d-inline-block" style="width:12px;height:12px;border-radius:3px;background:#06d6a0;"></span> Low (&lt;40%)</span>
+                    <span><span class="d-inline-block" style="width:12px;height:12px;border-radius:3px;background:#ffd166;"></span> Medium (40-70%)</span>
+                    <span><span class="d-inline-block" style="width:12px;height:12px;border-radius:3px;background:#ef476f;"></span> High (&gt;70%)</span>
+                </div>
+            </div>
+
+            <div class="card-panel bg-white rounded-4 p-4 shadow-sm border mt-3">
+                <h5 class="mb-3"><i class="bi bi-bell me-2 text-warning"></i>Join Queue</h5>
+                <p class="small text-muted">Select a hospital above, then join the queue from here.</p>
+                <button class="btn btn-primary w-100" id="joinQueueBtn" disabled onclick="joinQueue()">
+                    <i class="bi bi-plus-circle me-2"></i>Join Queue
+                </button>
+                <div id="queueJoinResult" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedHospital = null;
+let eventSource = null;
+
+async function loadHospitals() {
+    const res = await fetch("/api/hospitals");
+    const hospitals = await res.json();
+    const grid = document.getElementById("hospitalGrid");
+
+    grid.innerHTML = hospitals.map(h => {
+        const cap = h.capacity;
+        const capClass = cap > 0.7 ? "text-danger" : cap > 0.4 ? "text-warning" : "text-success";
+        const barColor = cap > 0.7 ? "#ef476f" : cap > 0.4 ? "#ffd166" : "#06d6a0";
+        return `<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <div class="hospital-card" onclick="selectHospital('${h.id}', this)" data-id="${h.id}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h6 class="mb-1">${h.name}</h6>
+                    <span class="badge ${cap > 0.7 ? 'bg-danger' : cap > 0.4 ? 'bg-warning text-dark' : 'bg-success'} bg-opacity-10 ${capClass}">${Math.round(cap*100)}%</span>
+                </div>
+                <small class="text-muted">${h.location}</small>
+                <div class="queue-bar mt-2"><div class="fill" style="width:${cap*100}%;background:${barColor};"></div></div>
+                <div class="d-flex justify-content-between mt-1">
+                    <small class="text-muted">Wait: ~${h.wait} min</small>
+                    <small class="text-muted">${h.beds} beds</small>
+                </div>
+            </div>
+        </div>`;
+    }).join("");
+}
+
+function selectHospital(id, el) {
+    document.querySelectorAll(".hospital-card").forEach(c => c.classList.remove("active"));
+    el.classList.add("active");
+    selectedHospital = id;
+    document.getElementById("joinQueueBtn").disabled = false;
+    showQueueDetail(id);
+}
+
+async function showQueueDetail(hospitalId) {
+    const res = await fetch(`/api/queue/${hospitalId}`);
+    const data = await res.json();
+    const detail = document.getElementById("queueDetail");
+
+    const capClass = data.capacity > 0.7 ? "danger" : data.capacity > 0.4 ? "warning" : "success";
+    const capText = data.capacity > 0.7 ? "Critical" : data.capacity > 0.4 ? "Moderate" : "Normal";
+
+    detail.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="bi bi-hospital me-2"></i>${data.hospital}</h5>
+            <span class="badge bg-${capClass} bg-opacity-10 text-${capClass} px-3 py-2">${capText}</span>
+        </div>
+
+        <div class="queue-display mb-3">
+            <div class="label">Now Serving</div>
+            <div class="number">${data.now_serving}</div>
+            <div class="label mt-2">Estimated Wait: ~${data.estimated_wait} min</div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-4">
+                <div class="bg-light rounded-3 p-3 text-center">
+                    <div class="fw-bold fs-4">${data.total_in_queue}</div>
+                    <small class="text-muted">In Queue</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="bg-light rounded-3 p-3 text-center">
+                    <div class="fw-bold fs-4">${Math.round(data.capacity*100)}%</div>
+                    <small class="text-muted">Capacity</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="bg-light rounded-3 p-3 text-center">
+                    <div class="fw-bold fs-4">${data.estimated_wait}</div>
+                    <small class="text-muted">Avg Wait (min)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="queue-bar" style="height:16px;">
+            <div class="fill ${data.capacity > 0.7 ? 'bg-danger' : data.capacity > 0.4 ? 'bg-warning' : 'bg-success'}" 
+                 style="width:${data.capacity*100}%;"></div>
+        </div>
+        <small class="text-muted">${Math.round(data.capacity*100)}% of ${data.capacity > 0.7 ? 'critical' : data.capacity > 0.4 ? 'moderate' : 'normal'} capacity</small>
+
+        <div class="mt-3 small text-muted">
+            <span class="live-dot me-1"></span> Live updates every 3 seconds
+        </div>
+    `;
+
+    startSSE(hospitalId);
+}
+
+function startSSE(hospitalId) {
+    if (eventSource) eventSource.close();
+    eventSource = new EventSource(`/api/queue/${hospitalId}/stream`);
+    eventSource.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const capClass = data.capacity > 0.7 ? "danger" : data.capacity > 0.4 ? "warning" : "success";
+        const nowServing = document.querySelector(".queue-display .number");
+        const waitEl = document.querySelectorAll(".queue-display .label")[1];
+        if (nowServing) nowServing.textContent = data.now_serving;
+        if (waitEl) waitEl.textContent = `Estimated Wait: ~${data.estimated_wait} min`;
+    };
+}
+
+async function joinQueue() {
+    if (!selectedHospital) return;
+    const result = document.getElementById("queueJoinResult");
+    try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/api/queue/${selectedHospital}/join`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) { result.innerHTML = `<div class="alert alert-danger py-2 small">${data.error}</div>`; return; }
+        result.innerHTML = `<div class="alert alert-success py-2 small">
+            <strong>✅ ${data.queue_number}</strong> — You are in queue at ${data.hospital}
+        </div>`;
+    } catch (e) {
+        result.innerHTML = `<div class="alert alert-danger py-2 small">Connection error</div>`;
+    }
+}
+
+loadHospitals();
+</script>
+</body>
+</html>
