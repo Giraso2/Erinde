@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, redirect
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key="secret"
@@ -6,7 +7,17 @@ app.secret_key="secret"
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html", user=session.get("user"))
+    context = {
+        "user": session.get("user", "Admin"),
+        "year": datetime.now().year,
+        "total_hospitals": 1248,
+        "active_patients": 34892,
+        "today_appointments": 12470,
+        "avg_wait_time": 23,
+        "daily_collections": "42.8M",
+        "monthly_total": "1.2B"
+    }
+    return render_template("dashboard.html", **context)
 
 
 @app.route("/location")

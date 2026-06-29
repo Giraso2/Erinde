@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erinde – National Smart Health Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+    --primary: #0d6efd;
+    --dark: #1a1a2e;
+    --accent: #00b4d8;
+    --success: #06d6a0;
+    --warning: #ffd166;
+    --danger: #ef476f;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f0f2f5;
+    overflow-x: hidden;
+}
+.topbar {
+    background: var(--dark);
+    color: white;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.topbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.topbar .brand i { font-size: 28px; color: var(--accent); }
+.topbar .brand span { color: #8ecae6; }
+.topbar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+}
+.topbar .user-info .badge-level {
+    background: var(--accent);
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 12px;
+}
+.sidebar {
+    width: 240px;
+    background: var(--dark);
+    min-height: calc(100vh - 60px);
+    padding-top: 16px;
+    position: fixed;
+    left: 0;
+    top: 60px;
+    overflow-y: auto;
+    z-index: 999;
+}
+.sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #adb5bd;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: 0.2s;
+    border-left: 3px solid transparent;
+    font-size: 14px;
+}
+.sidebar .nav-item:hover, .sidebar .nav-item.active {
+    background: rgba(13,110,253,0.15);
+    color: white;
+    border-left-color: var(--primary);
+}
+.sidebar .nav-item i { font-size: 18px; width: 22px; }
+.sidebar .nav-section {
+    color: #6c757d;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 16px 20px 6px;
+    font-weight: 600;
+}
+.main {
+    margin-left: 240px;
+    padding: 24px;
+    margin-top: 0;
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.page-header h2 {
+    font-weight: 700;
+    color: #1a1a2e;
+    font-size: 24px;
+}
+.page-header h2 small {
+    font-size: 14px;
+    font-weight: 400;
+    color: #6c757d;
+    display: block;
+}
+.date-badge {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    font-size: 14px;
+    color: #495057;
+}
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: 0.2s;
+    border: 1px solid #e9ecef;
+    height: 100%;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.stat-card .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+.stat-card .stat-label {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+.stat-card .stat-change {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+.stat-card .stat-change.up { color: var(--success); }
+.stat-card .stat-change.down { color: var(--danger); }
+.card-panel {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    height: 100%;
+}
+.card-panel .card-header-custom {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 15px;
+}
+.card-panel .card-body-custom { padding: 16px 20px; }
+.hospital-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+.hospital-row:last-child { border-bottom: none; }
+.hospital-row .h-name { font-weight: 600; font-size: 14px; }
+.hospital-row .h-detail { font-size: 12px; color: #6c757d; }
+.hospital-row .h-status {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.h-status.critical { background: #fce4ec; color: #c62828; }
+.h-status.high { background: #fff3e0; color: #e65100; }
+.h-status.medium { background: #fff8e1; color: #f9a825; }
+.h-status.low { background: #e8f5e9; color: #2e7d32; }
+.alert-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-item .alert-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.alert-item .alert-text { font-size: 14px; }
+.alert-item .alert-text .a-title { font-weight: 600; }
+.alert-item .alert-text .a-time { font-size: 12px; color: #6c757d; }
+.queue-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+}
+.queue-bar .qb-label {
+    width: 110px;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.queue-bar .qb-track {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.queue-bar .qb-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+}
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.heatmap-cell:hover { transform: scale(1.08); }
+@media (max-width: 768px) {
+    .sidebar { width: 60px; }
+    .sidebar .nav-item span, .sidebar .nav-section { display: none; }
+    .sidebar .nav-item { justify-content: center; padding: 12px; }
+    .main { margin-left: 60px; }
+    .heatmap-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <i class="bi bi-heart-pulse-fill"></i>
+        Erinde <span>| National Health Flow</span>
+    </div>
+    <div class="user-info">
+        <span class="badge-level"><i class="bi bi-shield-fill-check"></i> Ministry Level Access</span>
+        <i class="bi bi-bell-fill" style="font-size:18px; cursor:pointer;"></i>
+        <span><i class="bi bi-person-circle" style="font-size:20px;"></i> {{ user or 'Admin' }}</span>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="nav-section">Main</div>
+    <a href="/dashboard" class="nav-item active">
+        <i class="bi bi-grid-fill"></i><span>Dashboard</span>
+    </a>
+    <a href="/hospitals" class="nav-item">
+        <i class="bi bi-hospital"></i><span>Hospitals</span>
+    </a>
+    <a href="/doctors" class="nav-item">
+        <i class="bi bi-people-fill"></i><span>Doctors</span>
+    </a>
+    <div class="nav-section">Operations</div>
+    <a href="/book" class="nav-item">
+        <i class="bi bi-calendar-plus-fill"></i><span>Book Appointment</span>
+    </a>
+    <a href="/appointments" class="nav-item">
+        <i class="bi bi-calendar-check-fill"></i><span>Appointments</span>
+    </a>
+    <a href="/location" class="nav-item">
+        <i class="bi bi-geo-alt-fill"></i><span>Location</span>
+    </a>
+    <a href="/history" class="nav-item">
+        <i class="bi bi-clock-history"></i><span>History</span>
+    </a>
+    <div class="nav-section">Intelligence</div>
+    <a href="#" class="nav-item">
+        <i class="bi bi-graph-up-arrow"></i><span>Analytics</span>
+    </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-exclamation-triangle-fill"></i><span>Alerts</span>
+    </a>
+</div>
+
+<div class="main">
+
+    <div class="page-header">
+        <div>
+            <h2>
+                National Health Dashboard
+                <small><i class="bi bi-geo-alt-fill"></i> Rwanda – Real-time Patient Flow & Intelligence</small>
+            </h2>
+        </div>
+        <div class="date-badge">
+            <i class="bi bi-calendar3"></i>
+            <script>document.write(new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}))</script>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-hospital"></i></div>
+                <div class="stat-label">Total Health Facilities</div>
+                <div class="stat-value">1,248</div>
+                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> +12 this quarter</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-label">Active Patients Today</div>
+                <div class="stat-value">34,892</div>
+                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> +8.2% vs yesterday</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-calendar-check-fill"></i></div>
+                <div class="stat-label">Today's Appointments</div>
+                <div class="stat-value">12,470</div>
+                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> 78% checked in</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fce7f3;color:#db2777;"><i class="bi bi-clock-fill"></i></div>
+                <div class="stat-label">Avg. Wait Time</div>
+                <div class="stat-value">23 min</div>
+                <div class="stat-change down"><i class="bi bi-arrow-down-short"></i> -5 min from last week</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-8">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-building me-2"></i>Hospital Queue Status – Real-time</span>
+                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2"><i class="bi bi-dot"></i> Live</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="queue-bar">
+                        <span class="qb-label">CHUK</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:92%;background:#ef476f;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">92%</span>
+                    </div>
+                    <div class="queue-bar">
+                        <span class="qb-label">Kanombe</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:78%;background:#e65100;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">78%</span>
+                    </div>
+                    <div class="queue-bar">
+                        <span class="qb-label">Kigali Hosp.</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:65%;background:#f9a825;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">65%</span>
+                    </div>
+                    <div class="queue-bar">
+                        <span class="qb-label">Rwamagana</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:34%;background:#2e7d32;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">34%</span>
+                    </div>
+                    <div class="queue-bar">
+                        <span class="qb-label">Butare</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:45%;background:#2e7d32;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">45%</span>
+                    </div>
+                    <div class="queue-bar">
+                        <span class="qb-label">Musanze</span>
+                        <div class="qb-track"><div class="qb-fill" style="width:28%;background:#2e7d32;"></div></div>
+                        <span style="font-size:13px;font-weight:600;width:40px;">28%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Early Warning Alerts</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">2 Active</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="alert-item">
+                        <div class="alert-icon" style="background:#fce4ec;color:#c62828;"><i class="bi bi-virus"></i></div>
+                        <div class="alert-text">
+                            <div class="a-title">Unusual case spike – Eastern Province</div>
+                            <div style="font-size:12px;color:#6c757d;">Respiratory cases +40% above baseline</div>
+                            <div class="a-time"><i class="bi bi-clock"></i> 2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon" style="background:#fff3e0;color:#e65100;"><i class="bi bi-people-fill"></i></div>
+                        <div class="alert-text">
+                            <div class="a-title">CHUK at critical capacity</div>
+                            <div style="font-size:12px;color:#6c757d;">Queue at 92% – redirect patients</div>
+                            <div class="a-time"><i class="bi bi-clock"></i> 30 min ago</div>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon" style="background:#e8f5e9;color:#2e7d32;"><i class="bi bi-check-circle-fill"></i></div>
+                        <div class="alert-text">
+                            <div class="a-title">Rwamagana capacity normal</div>
+                            <div style="font-size:12px;color:#6c757d;">Available capacity – recommend referrals</div>
+                            <div class="a-time"><i class="bi bi-clock"></i> 1 hour ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-4">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-map-fill me-2"></i>National Congestion Heatmap</span>
+                </div>
+                <div class="card-body-custom">
+                    <div style="font-size:12px;color:#6c757d;margin-bottom:8px;">District congestion levels</div>
+                    <div class="heatmap-grid">
+                        <div class="heatmap-cell" style="background:#ef476f;">Kigali</div>
+                        <div class="heatmap-cell" style="background:#e65100;">East</div>
+                        <div class="heatmap-cell" style="background:#f9a825;">South</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">North</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">West</div>
+                        <div class="heatmap-cell" style="background:#e65100;">Bugesera</div>
+                        <div class="heatmap-cell" style="background:#ef476f;">Nyarugenge</div>
+                        <div class="heatmap-cell" style="background:#f9a825;">Huye</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">Musanze</div>
+                        <div class="heatmap-cell" style="background:#f9a825;">Rubavu</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">Nyagatare</div>
+                        <div class="heatmap-cell" style="background:#f9a825;">Rusizi</div>
+                        <div class="heatmap-cell" style="background:#e65100;">Kayonza</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">Gicumbi</div>
+                        <div class="heatmap-cell" style="background:#2e7d32;">Nyamasheke</div>
+                    </div>
+                    <div class="d-flex gap-3 mt-2" style="font-size:11px;">
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2e7d32;"></span> Low</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f9a825;"></span> Medium</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e65100;"></span> High</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef476f;"></span> Critical</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-cash-stack me-2"></i>Revenue & Payments</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;color:#6c757d;">Today's Collections</span>
+                        <span style="font-weight:700;">RWF 42.8M</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;color:#6c757d;">Mobile Money</span>
+                        <span style="font-weight:700;">RWF 31.2M</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;color:#6c757d;">Insurance (CBHI)</span>
+                        <span style="font-weight:700;">RWF 8.6M</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;color:#6c757d;">Pending Reconciliation</span>
+                        <span style="font-weight:700;color:#e65100;">RWF 2.1M</span>
+                    </div>
+                    <hr style="margin:12px 0;">
+                    <div class="d-flex justify-content-between">
+                        <span style="font-size:13px;font-weight:600;">Monthly Total</span>
+                        <span style="font-weight:700;color:var(--success);">RWF 1.2B</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-bar-chart-fill me-2"></i>Service Demand Trends</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;">General Consultation</span>
+                        <span style="font-size:13px;font-weight:600;">+12%</span>
+                    </div>
+                    <div class="progress mb-3" style="height:6px;">
+                        <div class="progress-bar bg-primary" style="width:72%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;">Pediatrics</span>
+                        <span style="font-size:13px;font-weight:600;">+8%</span>
+                    </div>
+                    <div class="progress mb-3" style="height:6px;">
+                        <div class="progress-bar bg-success" style="width:55%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;">Emergency</span>
+                        <span style="font-size:13px;font-weight:600;">+18%</span>
+                    </div>
+                    <div class="progress mb-3" style="height:6px;">
+                        <div class="progress-bar bg-danger" style="width:88%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;">Maternity</span>
+                        <span style="font-size:13px;font-weight:600;">+3%</span>
+                    </div>
+                    <div class="progress mb-3" style="height:6px;">
+                        <div class="progress-bar bg-warning" style="width:40%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:13px;">Pharmacy</span>
+                        <span style="font-size:13px;font-weight:600;">+6%</span>
+                    </div>
+                    <div class="progress mb-3" style="height:6px;">
+                        <div class="progress-bar bg-info" style="width:50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-xl-6">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-hospital me-2"></i>Facility Overview</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="hospital-row">
+                        <div>
+                            <div class="h-name">CHUK – Centre Hospitalier Univ. Kigali</div>
+                            <div class="h-detail">Kigali • 340 beds • 1,240 patients today</div>
+                        </div>
+                        <span class="h-status critical">Critical</span>
+                    </div>
+                    <div class="hospital-row">
+                        <div>
+                            <div class="h-name">Kanombe Military Hospital</div>
+                            <div class="h-detail">Kanombe • 200 beds • 890 patients today</div>
+                        </div>
+                        <span class="h-status high">High</span>
+                    </div>
+                    <div class="hospital-row">
+                        <div>
+                            <div class="h-name">Kigali Teaching Hospital</div>
+                            <div class="h-detail">Kacyiru • 280 beds • 760 patients today</div>
+                        </div>
+                        <span class="h-status medium">Medium</span>
+                    </div>
+                    <div class="hospital-row">
+                        <div>
+                            <div class="h-name">Rwamagana Provincial Hospital</div>
+                            <div class="h-detail">Rwamagana • 150 beds • 420 patients today</div>
+                        </div>
+                        <span class="h-status low">Low</span>
+                    </div>
+                    <div class="hospital-row">
+                        <div>
+                            <div class="h-name">Butare University Hospital</div>
+                            <div class="h-detail">Huye • 180 beds • 510 patients today</div>
+                        </div>
+                        <span class="h-status low">Low</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card-panel">
+                <div class="card-header-custom">
+                    <span><i class="bi bi-phone-fill me-2"></i>USSD & Mobile Access</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">Active</span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div style="background:#f0f2f5;border-radius:10px;padding:14px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:var(--primary);">847</div>
+                                <div style="font-size:12px;color:#6c757d;">USSD Sessions Today</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#f0f2f5;border-radius:10px;padding:14px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:var(--success);">2,341</div>
+                                <div style="font-size:12px;color:#6c757d;">Mobile App Users</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#f0f2f5;border-radius:10px;padding:14px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:#d97706;">1,206</div>
+                                <div style="font-size:12px;color:#6c757d;">Queue # Assigned</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#f0f2f5;border-radius:10px;padding:14px;text-align:center;">
+                                <div style="font-size:24px;font-weight:700;color:#db2777;">RWF 8.4M</div>
+                                <div style="font-size:12px;color:#6c757d;">Mobile Payments</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;padding:10px;background:#f8f9fa;border-radius:8px;font-size:13px;">
+                        <i class="bi bi-info-circle me-1 text-primary"></i>
+                        Citizens can dial <strong>*880#</strong> to book, pay, and receive queue numbers on any phone.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-2" style="font-size:13px;color:#6c757d;">
+        <i class="bi bi-shield-check me-1"></i> Erinde – National Smart Health Access & Flow Infrastructure  |  Secured & Encrypted
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctors – Erinde</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+body { background: #f4f6f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+.topbar {
+    background: #1a1a2e; color: white; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.topbar .brand { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; }
+.topbar .brand i { font-size: 28px; color: #00b4d8; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <i class="bi bi-heart-pulse-fill"></i> Erinde <span style="font-size:14px;font-weight:400;color:#8ecae6;">| Doctors</span>
+    </div>
+    <a href="/dashboard" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="bi bi-people-fill me-2 text-primary"></i>Available Doctors</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5>Dr. Giraso</h5>
+                <p class="mb-1 text-muted">General Practitioner</p>
+                <p class="text-muted small">Kanombe Hospital</p>
+                <a href="/book" class="btn btn-primary btn-sm">Book Appointment</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5>Dr. Alice</h5>
+                <p class="mb-1 text-muted">Pediatrician</p>
+                <p class="text-muted small">Kigali Hospital</p>
+                <a href="/book" class="btn btn-primary btn-sm">Book Appointment</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5>Dr. John</h5>
+                <p class="mb-1 text-muted">Surgeon</p>
+                <p class="text-muted small">CHUK Hospital</p>
+                <a href="/book" class="btn btn-primary btn-sm">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
