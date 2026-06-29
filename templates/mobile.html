@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" href="/static/app-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/app-icon.svg">
+<title>Erinde – Smart Health</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+  --primary: #0d6efd;
+  --dark: #1a1a2e;
+  --accent: #00b4d8;
+  --success: #06d6a0;
+  --bottom-nav-height: 64px;
+  --status-bar-height: env(safe-area-inset-top, 0px);
+}
+* { -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  padding-top: var(--status-bar-height);
+  padding-bottom: var(--bottom-nav-height);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Status Bar */
+.status-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--status-bar-height);
+  background: var(--dark); z-index: 9999;
+}
+
+/* Header */
+.app-header {
+  position: fixed; top: var(--status-bar-height); left: 0; right: 0;
+  background: var(--dark); color: white;
+  padding: 12px 16px; z-index: 1000;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.app-header .brand-icon { font-size: 24px; color: var(--accent); }
+.app-header h1 { font-size: 18px; font-weight: 700; margin: 0; flex: 1; }
+.app-header h1 span { color: #8ecae6; font-weight: 400; font-size: 14px; }
+.app-header .header-action { font-size: 20px; cursor: pointer; padding: 4px; }
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-height);
+  background: white; border-top: 1px solid #e9ecef;
+  display: flex; z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bottom-nav .tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; cursor: pointer; color: #adb5bd;
+  transition: 0.15s; padding: 6px 0;
+  border: none; background: none; font-size: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-nav .tab i { font-size: 22px; transition: 0.15s; }
+.bottom-nav .tab.active { color: var(--primary); }
+.bottom-nav .tab.active i { transform: scale(1.1); }
+.bottom-nav .tab-center {
+  position: relative; top: -12px;
+}
+.bottom-nav .tab-center .fab {
+  width: 52px; height: 52px;
+  background: var(--primary); color: white;
+  border-radius: 50%; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 24px; box-shadow: 0 4px 12px rgba(13,110,253,0.4);
+  border: 3px solid white;
+}
+
+/* Page content */
+.page-content {
+  padding: 16px;
+  margin-top: 60px;
+  padding-bottom: 16px;
+}
+.page { display: none; animation: fadeIn 0.25s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cards */
+.m-card {
+  background: white; border-radius: 14px; padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e9ecef;
+  margin-bottom: 12px; transition: 0.15s;
+}
+.m-card:active { transform: scale(0.98); }
+.m-card .icon-circle {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.m-stat {
+  text-align: center; padding: 12px;
+}
+.m-stat .value { font-size: 24px; font-weight: 700; color: var(--dark); }
+.m-stat .label { font-size: 12px; color: #6c757d; }
+
+/* Quick Action Grid */
+.quick-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  margin-bottom: 16px;
+}
+.quick-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 12px 4px; cursor: pointer;
+  background: white; border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e9ecef;
+  transition: 0.15s; font-size: 11px;
+}
+.quick-item:active { transform: scale(0.94); }
+.quick-item .qi-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+/* Queue bar mini */
+.queue-mini { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.queue-mini .qm-label { width: 90px; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.queue-mini .qm-track { flex: 1; height: 6px; background: #e9ecef; border-radius: 10px; overflow: hidden; }
+.queue-mini .qm-fill { height: 100%; border-radius: 10px; }
+.queue-mini .qm-pct { font-size: 12px; font-weight: 600; width: 36px; text-align: right; }
+
+/* Bottom sheet */
+.modal-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: white; border-radius: 20px 20px 0 0;
+  z-index: 2000; transform: translateY(100%);
+  transition: 0.3s ease; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+}
+.modal-sheet.open { transform: translateY(0); }
+.modal-sheet .handle {
+  width: 40px; height: 4px; background: #dee2e6;
+  border-radius: 4px; margin: 10px auto;
+}
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 1999; opacity: 0; pointer-events: none;
+  transition: 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* List items */
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #f1f3f5;
+}
+.list-item:last-child { border-bottom: none; }
+
+/* Form elements */
+input, select, textarea {
+  -webkit-appearance: none; border-radius: 10px;
+  border: 1.5px solid #dee2e6; padding: 12px 14px;
+  font-size: 16px; width: 100%; background: white;
+  margin-bottom: 10px; transition: 0.15s;
+}
+input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,110,253,0.1); }
+.btn-mobile {
+  display: block; width: 100%; padding: 14px;
+  border: none; border-radius: 12px; font-size: 16px;
+  font-weight: 600; cursor: pointer; transition: 0.15s;
+  text-align: center;
+}
+.btn-mobile:active { transform: scale(0.97); }
+.btn-primary-m { background: var(--primary); color: white; }
+.btn-success-m { background: var(--success); color: white; }
+.btn-outline-m { background: white; border: 1.5px solid var(--primary); color: var(--primary); }
+
+/* Badge */
+.badge-m {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-m.green { background: #dcfce7; color: #16a34a; }
+.badge-m.yellow { background: #fef3c7; color: #d97706; }
+.badge-m.red { background: #fce4ec; color: #c62828; }
+.badge-m.blue { background: #e0f2fe; color: #0284c7; }
+
+/* Toast */
+.toast-m {
+  position: fixed; bottom: 80px; left: 16px; right: 16px;
+  background: var(--dark); color: white; padding: 14px 20px;
+  border-radius: 12px; z-index: 3000; font-size: 14px;
+  text-align: center; opacity: 0; pointer-events: none;
+  transition: 0.3s; transform: translateY(20px);
+}
+.toast-m.show { opacity: 1; transform: translateY(0); }
+
+/* Pull to refresh indicator */
+.pull-indicator {
+  text-align: center; padding: 12px; color: #6c757d;
+  font-size: 13px; display: none;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+  background-size: 200% 100%; animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<div class="app-header">
+  <i class="bi bi-heart-pulse-fill brand-icon"></i>
+  <h1>Erinde <span>| Smart Health</span></h1>
+  <i class="bi bi-person-circle header-action" onclick="showProfile()"></i>
+</div>
+
+<div class="page-content" id="pageContainer">
+
+  <!-- ═══ HOME PAGE ═══ -->
+  <div class="page active" id="page-home">
+    <div class="pull-indicator" id="pullIndicator">↓ Pull to refresh</div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="mb-0" id="greeting">Good morning, <span id="userName">Guest</span></h5>
+        <small class="text-muted" id="currentDate"></small>
+      </div>
+      <span class="badge-m blue"><i class="bi bi-dot"></i> Live</span>
+    </div>
+
+    <div class="quick-grid">
+      <div class="quick-item" onclick="navigateTo('book')">
+        <div class="qi-icon" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-calendar-plus"></i></div>
+        Book
+      </div>
+      <div class="quick-item" onclick="navigateTo('pay')">
+        <div class="qi-icon" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-cash-stack"></i></div>
+        Pay
+      </div>
+      <div class="quick-item" onclick="navigateTo('queue')">
+        <div class="qi-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-people"></i></div>
+        Queue
+      </div>
+      <div class="quick-item" onclick="navigateTo('hospitals')">
+        <div class="qi-icon" style="background:#fce7f3;color:#db2777;"><i class="bi bi-hospital"></i></div>
+        Hospitals
+      </div>
+    </div>
+
+    <div class="m-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-building me-2 text-primary"></i>Hospital Queue Status</h6>
+        <small class="text-muted">Live</small>
+      </div>
+      <div id="homeQueueList">
+        <div class="skeleton" style="height:30px;margin:4px 0;"></div>
+        <div class="skeleton" style="height:30px;margin:4px 0;"></div>
+        <div class="skeleton" style="height:30px;margin:4px 0;"></div>
+      </div>
+    </div>
+
+    <div class="m-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="fw-bold mb-0">Next Appointment</h6>
+          <small class="text-muted" id="nextAppt">No upcoming appointments</small>
+        </div>
+        <i class="bi bi-chevron-right text-muted"></i>
+      </div>
+    </div>
+
+    <div class="m-card">
+      <h6 class="fw-bold mb-2"><i class="bi bi-megaphone me-2 text-warning"></i>Quick Tips</h6>
+      <small class="text-muted">📱 Dial <strong>*880#</strong> on any phone to book, pay, and get queue numbers without internet.</small>
+    </div>
+  </div>
+
+  <!-- ═══ BOOK PAGE ═══ -->
+  <div class="page" id="page-book">
+    <h5 class="fw-bold mb-3"><i class="bi bi-calendar-plus text-primary me-2"></i>Book Appointment</h5>
+    <div class="m-card">
+      <input type="text" id="bookName" placeholder="Patient Full Name">
+      <select id="bookHospital">
+        <option value="">Select Hospital</option>
+        <option value="CHUK">CHUK</option>
+        <option value="Kanombe Hospital">Kanombe Hospital</option>
+        <option value="Kigali Teaching Hospital">Kigali Teaching Hospital</option>
+        <option value="Rwamagana Hospital">Rwamagana Hospital</option>
+        <option value="Butare Hospital">Butare Hospital</option>
+      </select>
+      <select id="bookDoctor">
+        <option value="">Select Doctor</option>
+        <option value="Dr Giraso">Dr Giraso - General</option>
+        <option value="Dr Alice">Dr Alice - Pediatrics</option>
+        <option value="Dr John">Dr John - Surgery</option>
+        <option value="Dr Marie">Dr Marie - Maternity</option>
+      </select>
+      <input type="date" id="bookDate">
+      <input type="time" id="bookTime" value="09:00">
+      <button class="btn-mobile btn-primary-m mt-2" onclick="bookAppointment()">
+        <i class="bi bi-check-circle me-2"></i>Book Appointment
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ PAY PAGE ═══ -->
+  <div class="page" id="page-pay">
+    <h5 class="fw-bold mb-3"><i class="bi bi-cash-stack text-success me-2"></i>Mobile Money</h5>
+    <div class="m-card">
+      <small class="text-muted d-block mb-2">Select Provider</small>
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn-mobile btn-outline-m flex-fill provider-btn active" data-provider="MTN" onclick="selectProvider(this)">MTN MoMo</button>
+        <button class="btn-mobile btn-outline-m flex-fill provider-btn" data-provider="Airtel" onclick="selectProvider(this)">Airtel Money</button>
+      </div>
+      <input type="tel" id="payPhone" placeholder="Phone Number" value="+250780000000">
+      <input type="number" id="payAmount" placeholder="Amount (RWF)" min="100" value="5000">
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="setPayAmount(2000)">2,000</button>
+        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="setPayAmount(5000)">5,000</button>
+        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="setPayAmount(10000)">10,000</button>
+        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="setPayAmount(20000)">20,000</button>
+      </div>
+      <button class="btn-mobile btn-success-m" onclick="payMobile()">
+        <i class="bi bi-lock me-2"></i>Pay RWF <span id="payDisplay">5,000</span>
+      </button>
+    </div>
+    <div id="payResult"></div>
+  </div>
+
+  <!-- ═══ QUEUE PAGE ═══ -->
+  <div class="page" id="page-queue">
+    <h5 class="fw-bold mb-3"><i class="bi bi-people text-warning me-2"></i>Live Queue</h5>
+    <div id="queueList"></div>
+  </div>
+
+  <!-- ═══ HOSPITALS PAGE ═══ -->
+  <div class="page" id="page-hospitals">
+    <h5 class="fw-bold mb-3"><i class="bi bi-hospital text-danger me-2"></i>Hospitals</h5>
+    <div class="m-card">
+      <input type="text" placeholder="Search hospitals..." oninput="filterHospitals(this.value)" id="hospitalSearch">
+    </div>
+    <div id="hospitalList"></div>
+  </div>
+
+  <!-- ═══ PROFILE SHEET ═══ -->
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="tab active" data-page="home" onclick="switchTab('home',this)">
+    <i class="bi bi-house-fill"></i><span>Home</span>
+  </button>
+  <button class="tab" data-page="book" onclick="switchTab('book',this)">
+    <i class="bi bi-calendar-plus"></i><span>Book</span>
+  </button>
+  <button class="tab tab-center" data-page="pay" onclick="switchTab('pay',this)">
+    <div class="fab"><i class="bi bi-cash-stack"></i></div>
+    <span style="margin-top:2px;">Pay</span>
+  </button>
+  <button class="tab" data-page="queue" onclick="switchTab('queue',this)">
+    <i class="bi bi-people-fill"></i><span>Queue</span>
+  </button>
+  <button class="tab" data-page="hospitals" onclick="switchTab('hospitals',this)">
+    <i class="bi bi-hospital"></i><span>Hospitals</span>
+  </button>
+</div>
+
+<!-- Profile Bottom Sheet -->
+<div class="modal-overlay" id="profileOverlay" onclick="closeProfile()"></div>
+<div class="modal-sheet" id="profileSheet">
+  <div class="handle"></div>
+  <div class="p-3">
+    <div class="text-center mb-3">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--dark);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+        <i class="bi bi-person-fill" style="font-size:32px;color:white;"></i>
+      </div>
+      <h5 class="mt-2" id="profileName">Guest</h5>
+      <small class="text-muted" id="profileEmail">Not logged in</small>
+    </div>
+    <div class="list-item" onclick="logout()"><i class="bi bi-box-arrow-right text-danger"></i><span>Logout</span></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-m" id="toast"></div>
+
+<script>
+let token = localStorage.getItem("token");
+let currentPage = "home";
+let payProvider = "MTN";
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("currentDate").textContent = new Date().toLocaleDateString("en-US", {weekday:"long", month:"short", day:"numeric"});
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  document.getElementById("greeting").textContent = greet;
+
+  if (token) {
+    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(u => {
+        document.getElementById("userName").textContent = u.name || u.email;
+        document.getElementById("profileName").textContent = u.name || "User";
+        document.getElementById("profileEmail").textContent = u.email;
+      }).catch(() => {});
+  }
+
+  loadHomeQueue();
+  loadHospitals();
+  loadQueuePage();
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/sw.js");
+  }
+});
+
+// ── Tab Navigation ──
+function switchTab(page, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  document.getElementById(`page-${page}`).classList.add("active");
+  currentPage = page;
+  if (page === "home") loadHomeQueue();
+  if (page === "queue") loadQueuePage();
+}
+
+function navigateTo(page) {
+  const tab = document.querySelector(`.tab[data-page="${page}"]`);
+  if (tab) switchTab(page, tab);
+}
+
+// ── Home Queue ──
+async function loadHomeQueue() {
+  try {
+    const res = await fetch("/api/hospitals");
+    const hospitals = await res.json();
+    const list = document.getElementById("homeQueueList");
+    list.innerHTML = hospitals.slice(0,5).map(h => {
+      const pct = Math.round(h.capacity * 100);
+      const color = pct > 70 ? "#ef476f" : pct > 40 ? "#ffd166" : "#06d6a0";
+      return `<div class="queue-mini">
+        <span class="qm-label">${h.name.split(" ")[0]}</span>
+        <div class="qm-track"><div class="qm-fill" style="width:${pct}%;background:${color};"></div></div>
+        <span class="qm-pct">${pct}%</span>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    document.getElementById("homeQueueList").innerHTML = '<small class="text-muted">Offline</small>';
+  }
+}
+
+// ── Book Appointment ──
+async function bookAppointment() {
+  const data = {
+    patient_name: document.getElementById("bookName").value,
+    hospital: document.getElementById("bookHospital").value,
+    doctor: document.getElementById("bookDoctor").value,
+    date: document.getElementById("bookDate").value,
+    time: document.getElementById("bookTime").value
+  };
+  if (!data.patient_name || !data.hospital || !data.doctor) {
+    showToast("Please fill all fields"); return;
+  }
+  try {
+    const res = await fetch("/api/appointments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!res.ok) { showToast(result.error || "Error"); return; }
+    showToast(`✅ Booked! Ref: ${result.ref} • Queue: ${result.queue_number}`);
+    document.getElementById("bookName").value = "";
+  } catch (e) {
+    showToast("Connection error");
+  }
+}
+
+// ── Pay ──
+function selectProvider(el) {
+  document.querySelectorAll(".provider-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  payProvider = el.dataset.provider;
+}
+function setPayAmount(amt) {
+  document.getElementById("payAmount").value = amt;
+  document.getElementById("payDisplay").textContent = amt.toLocaleString();
+}
+document.getElementById("payAmount")?.addEventListener("input", function() {
+  document.getElementById("payDisplay").textContent = (parseInt(this.value)||0).toLocaleString();
+});
+
+async function payMobile() {
+  const amount = parseInt(document.getElementById("payAmount").value);
+  const phone = document.getElementById("payPhone").value;
+  if (amount < 100) { showToast("Minimum 100 RWF"); return; }
+  try {
+    const res = await fetch("/api/payments/mobile-money", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ amount, phone, provider: payProvider, purpose: "appointment" })
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error); return; }
+    showToast(`✅ ${data.ref} — RWF ${data.amount.toLocaleString()} via ${data.provider}`);
+    document.getElementById("payResult").innerHTML =
+      `<div class="m-card" style="background:#dcfce7;color:#16a34a;text-align:center;">
+        <i class="bi bi-check-circle-fill" style="font-size:32px;"></i>
+        <h6 class="mt-2 mb-0">Payment Successful</h6>
+        <small>${data.ref}</small>
+      </div>`;
+  } catch (e) { showToast("Connection error"); }
+}
+
+// ── Queue Page ──
+async function loadQueuePage() {
+  try {
+    const res = await fetch("/api/hospitals");
+    const hospitals = await res.json();
+    const container = document.getElementById("queueList");
+    container.innerHTML = hospitals.map(h => {
+      const pct = Math.round(h.capacity * 100);
+      const cls = pct > 70 ? "red" : pct > 40 ? "yellow" : "green";
+      return `<div class="m-card" onclick="showQueueDetail('${h.id}','${h.name}')">
+        <div class="d-flex justify-content-between align-items-center">
+          <div><h6 class="mb-0">${h.name}</h6><small class="text-muted">${h.location}</small></div>
+          <span class="badge-m ${cls}">${pct}%</span>
+        </div>
+        <div class="queue-mini mt-1">
+          <div class="qm-track" style="height:8px;"><div class="qm-fill" style="width:${pct}%;background:${pct>70?'#ef476f':pct>40?'#ffd166':'#06d6a0'};"></div></div>
+        </div>
+        <small class="text-muted">Wait: ~${h.wait} min • ${h.beds} beds</small>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    document.getElementById("queueList").innerHTML = '<p class="text-muted text-center">Offline</p>';
+  }
+}
+
+function showQueueDetail(id, name) {
+  showToast(`📍 ${name} — Tap "Join Queue" on the Queue tab`);
+  navigateTo("queue");
+}
+
+// ── Hospitals Page ──
+async function loadHospitals() {
+  try {
+    const res = await fetch("/api/hospitals");
+    const hospitals = await res.json();
+    window._hospitals = hospitals;
+    renderHospitals(hospitals);
+  } catch (e) {}
+}
+function renderHospitals(list) {
+  document.getElementById("hospitalList").innerHTML = list.map(h => {
+    const pct = Math.round(h.capacity * 100);
+    const cls = pct > 70 ? "red" : pct > 40 ? "yellow" : "green";
+    return `<div class="m-card">
+      <div class="d-flex justify-content-between">
+        <div><h6 class="mb-0">${h.name}</h6><small class="text-muted">${h.location}</small></div>
+        <span class="badge-m ${cls}">${pct}%</span>
+      </div>
+      <small class="text-muted d-block mt-1">${h.beds} beds • ~${h.wait} min wait</small>
+      <button class="btn btn-sm btn-outline-primary mt-2" onclick="navigateTo('book')">Book</button>
+    </div>`;
+  }).join("");
+}
+function filterHospitals(q) {
+  if (!window._hospitals) return;
+  const filtered = window._hospitals.filter(h =>
+    h.name.toLowerCase().includes(q.toLowerCase()) ||
+    h.location.toLowerCase().includes(q.toLowerCase())
+  );
+  renderHospitals(filtered);
+}
+
+// ── Profile ──
+function showProfile() { document.getElementById("profileSheet").classList.add("open"); document.getElementById("profileOverlay").classList.add("open"); }
+function closeProfile() { document.getElementById("profileSheet").classList.remove("open"); document.getElementById("profileOverlay").classList.remove("open"); }
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "/login";
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ── Pull to refresh ──
+let startY = 0;
+document.getElementById("pageContainer").addEventListener("touchstart", e => startY = e.touches[0].screenY);
+document.getElementById("pageContainer").addEventListener("touchmove", e => {
+  const dy = e.touches[0].screenY - startY;
+  if (dy > 80 && window.scrollY === 0) {
+    document.getElementById("pullIndicator").style.display = "block";
+    document.getElementById("pullIndicator").textContent = "↻ Refresh...";
+  }
+});
+document.getElementById("pageContainer").addEventListener("touchend", e => {
+  const el = document.getElementById("pullIndicator");
+  if (el.style.display === "block") {
+    el.textContent = "⟳ Refreshing...";
+    loadHomeQueue(); loadQueuePage(); loadHospitals();
+    setTimeout(() => { el.style.display = "none"; showToast("✓ Updated"); }, 600);
+  }
+});
+</script>
+</body>
+</html>

@@ -339,6 +339,10 @@ def home():
     if session.get("user"): return redirect("/dashboard")
     return redirect("/login")
 
+@app.route("/mobile")
+def mobile_app():
+    return render_template("mobile.html")
+
 @app.route("/login")
 def login_page():
     return render_template("login.html")
