@@ -21,6 +21,7 @@ const roleGradient: Record<UserRole, string> = {
   doctor: 'from-teal-500/10 to-blue-500/5 hover:from-teal-500/20 hover:to-blue-500/10 border-teal-200/50',
   admin: 'from-purple-500/10 to-blue-500/5 hover:from-purple-500/20 hover:to-blue-500/10 border-purple-200/50',
   ministry: 'from-blue-900/10 to-blue-800/5 hover:from-blue-900/20 hover:to-blue-800/10 border-blue-800/30',
+  receptionist: 'from-amber-500/10 to-blue-500/5 hover:from-amber-500/20 hover:to-blue-500/10 border-amber-200/50',
 }
 
 export function QuickActions({ role, actions }: QuickActionsProps) {

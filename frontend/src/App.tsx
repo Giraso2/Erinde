@@ -5,6 +5,7 @@ import { PatientLayout } from '@/layouts/patient-layout'
 import { DoctorLayout } from '@/layouts/doctor-layout'
 import { AdminLayout } from '@/layouts/admin-layout'
 import { MinistryLayout } from '@/layouts/ministry-layout'
+import { ReceptionistLayout } from '@/layouts/receptionist-layout'
 import PatientHome from '@/pages/patient/home'
 import PatientAppointments from '@/pages/patient/appointments'
 import PatientQueue from '@/pages/patient/queue'
@@ -25,6 +26,16 @@ import AdminFinance from '@/pages/admin/finance'
 import AdminInventory from '@/pages/admin/inventory'
 import AdminReports from '@/pages/admin/reports'
 import MinistryDashboard from '@/pages/ministry/dashboard'
+import ReceptionistHome from '@/pages/receptionist/home'
+import ReceptionistVerify from '@/pages/receptionist/verify'
+import ReceptionistWalkIn from '@/pages/receptionist/walk-in'
+import ReceptionistQueue from '@/pages/receptionist/queue'
+import ReceptionistSearch from '@/pages/receptionist/search'
+import ReceptionistInsurance from '@/pages/receptionist/insurance'
+import ReceptionistPayments from '@/pages/receptionist/payments'
+import ReceptionistDoctors from '@/pages/receptionist/doctors'
+import ReceptionistNotifications from '@/pages/receptionist/notifications'
+import ReceptionistReports from '@/pages/receptionist/reports'
 
 const queryClient = new QueryClient()
 
@@ -67,6 +78,20 @@ function App() {
           {/* Ministry Routes */}
           <Route path="/ministry" element={<MinistryLayout />}>
             <Route index element={<MinistryDashboard />} />
+          </Route>
+
+          {/* Receptionist Routes */}
+          <Route path="/receptionist" element={<ReceptionistLayout />}>
+            <Route index element={<ReceptionistHome />} />
+            <Route path="verify" element={<ReceptionistVerify />} />
+            <Route path="walk-in" element={<ReceptionistWalkIn />} />
+            <Route path="queue" element={<ReceptionistQueue />} />
+            <Route path="search" element={<ReceptionistSearch />} />
+            <Route path="insurance" element={<ReceptionistInsurance />} />
+            <Route path="payments" element={<ReceptionistPayments />} />
+            <Route path="doctors" element={<ReceptionistDoctors />} />
+            <Route path="notifications" element={<ReceptionistNotifications />} />
+            <Route path="reports" element={<ReceptionistReports />} />
           </Route>
 
           {/* Default redirect */}

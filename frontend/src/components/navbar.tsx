@@ -23,6 +23,7 @@ const roleBadgeVariant: Record<UserRole, 'default' | 'secondary' | 'success' | '
   doctor: 'success',
   admin: 'warning',
   ministry: 'error',
+  receptionist: 'default',
 }
 
 interface NavbarProps {

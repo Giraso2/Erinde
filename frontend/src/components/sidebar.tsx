@@ -21,6 +21,10 @@ import {
   AlertTriangle,
   TrendingUp,
   X,
+  Search,
+  ShieldCheck,
+  UserPlus,
+  Printer,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -61,6 +65,18 @@ const navConfig: Record<UserRole, NavItem[]> = {
     { label: 'Alerts', href: '/ministry/alerts', icon: AlertTriangle },
     { label: 'Forecasts', href: '/ministry/forecasts', icon: TrendingUp },
   ],
+  receptionist: [
+    { label: 'Home', href: '/receptionist', icon: Home },
+    { label: 'Verify Appointment', href: '/receptionist/verify', icon: Search },
+    { label: 'Walk-in Registration', href: '/receptionist/walk-in', icon: UserPlus },
+    { label: 'Queue Management', href: '/receptionist/queue', icon: ClipboardList },
+    { label: 'Patient Search', href: '/receptionist/search', icon: Search },
+    { label: 'Insurance Verification', href: '/receptionist/insurance', icon: ShieldCheck },
+    { label: 'Payments', href: '/receptionist/payments', icon: CreditCard },
+    { label: 'Doctor Availability', href: '/receptionist/doctors', icon: Stethoscope },
+    { label: 'Notifications', href: '/receptionist/notifications', icon: Bell },
+    { label: 'Reports', href: '/receptionist/reports', icon: BarChart3 },
+  ],
 }
 
 const roleBadgeVariant: Record<UserRole, 'default' | 'secondary' | 'success' | 'warning' | 'error'> = {
@@ -68,6 +84,7 @@ const roleBadgeVariant: Record<UserRole, 'default' | 'secondary' | 'success' | '
   doctor: 'success',
   admin: 'warning',
   ministry: 'error',
+  receptionist: 'default',
 }
 
 interface SidebarProps {
