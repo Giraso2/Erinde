@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erinde – Smart Health Access & Flow Infrastructure</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0B1F4D;
+  --blue: #2563EB;
+  --light-blue: #EAF4FF;
+  --sky: #60A5FA;
+  --white: #FFFFFF;
+  --gray-bg: #F8FAFC;
+  --text-gray: #64748B;
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --error: #DC2626;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--white);
+  color: #1e293b;
+  overflow-x: hidden;
+}
+
+/* ── NAVIGATION ── */
+.navbar {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 0;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.08); }
+
+.navbar .container { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+
+.navbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+
+.navbar-brand .logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 18px;
+}
+
+.navbar-brand .brand-text { display: flex; flex-direction: column; }
+
+.navbar-brand .brand-name { font-weight: 700; font-size: 18px; color: var(--navy); line-height: 1.2; }
+
+.navbar-brand .brand-tagline { font-size: 11px; color: var(--text-gray); font-weight: 400; letter-spacing: 0.3px; }
+
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; margin: 0; padding: 0; }
+
+.nav-links a {
+  text-decoration: none;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--blue);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.nav-links a:hover { color: var(--blue); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.lang-selector {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: #475569;
+  cursor: pointer; background: white;
+  transition: all 0.2s;
+}
+
+.lang-selector:hover { border-color: var(--sky); }
+
+.btn-login {
+  padding: 8px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  color: var(--navy);
+  font-size: 14px; font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-login:hover { border-color: var(--blue); color: var(--blue); background: var(--light-blue); }
+
+.btn-signup-nav {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: white;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.btn-signup-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(37,99,235,0.3); }
+
+.mobile-toggle { display: none; background: none; border: none; font-size: 24px; color: var(--navy); cursor: pointer; }
+
+/* ── SIGN UP MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  max-width: 900px;
+  width: 90%;
+  position: relative;
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px; right: 24px;
+  background: none; border: none;
+  font-size: 28px; color: var(--text-gray);
+  cursor: pointer; transition: color 0.2s;
+  line-height: 1;
+}
+
+.modal-close:hover { color: var(--navy); }
+
+.modal-title { text-align: center; margin-bottom: 8px; }
+
+.modal-title h2 { font-size: 32px; font-weight: 800; color: var(--navy); }
+
+.modal-title p { color: var(--text-gray); margin-top: 8px; font-size: 16px; }
+
+.account-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px; }
+
+.account-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.account-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(37,99,235,0.15);
+}
+
+.account-card .card-icon {
+  width: 64px; height: 64px;
+  background: var(--light-blue);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+  color: var(--blue);
+  transition: all 0.3s;
+}
+
+.account-card:hover .card-icon { background: var(--blue); color: white; }
+
+.account-card h3 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+
+.account-card p { font-size: 14px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px; }
+
+.account-card .card-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.card-btn.patient-btn { background: var(--blue); color: white; }
+.card-btn.patient-btn:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
+.card-btn.doctor-btn { background: var(--navy); color: white; }
+.card-btn.doctor-btn:hover { box-shadow: 0 6px 20px rgba(11,31,77,0.3); }
+.card-btn.hospital-btn { background: linear-gradient(135deg, var(--navy), var(--blue)); color: white; }
+.card-btn.hospital-btn:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
+
+/* ── HERO ── */
+.hero {
+  padding: 160px 0 100px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EAF4FF 50%, #F8FAFC 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%; left: -10%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(96,165,250,0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.hero .container { position: relative; z-index: 1; }
+
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 100px;
+  padding: 8px 16px 8px 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--navy);
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.hero-badge .flag { font-size: 18px; }
+
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.hero h1 {
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--navy);
+  margin-bottom: 20px;
+  letter-spacing: -1.5px;
+}
+
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  max-width: 540px;
+}
+
+.hero-desc {
+  font-size: 15px;
+  color: var(--text-gray);
+  line-height: 1.7;
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn-primary-lg {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px; font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.btn-primary-lg:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37,99,235,0.3); color: white; }
+
+.btn-secondary-lg {
+  padding: 14px 28px;
+  background: white;
+  color: var(--navy);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px; font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.btn-secondary-lg:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+
+.btn-outline-lg {
+  padding: 14px 28px;
+  background: transparent;
+  color: var(--navy);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 15px; font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.btn-outline-lg:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+.hero-image {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+}
+
+.hero-image img {
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-image .image-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(11,31,77,0.6));
+  padding: 40px 32px 24px;
+  color: white;
+}
+
+.hero-image .image-overlay p { font-size: 14px; font-weight: 500; opacity: 0.9; margin: 0; }
+
+/* ── QUICK SERVICE CARDS ── */
+.quick-services { padding: 60px 0; background: var(--white); }
+
+.quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+.quick-card {
+  background: var(--gray-bg);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  border-color: #e2e8f0;
+  background: white;
+}
+
+.quick-card .qc-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.quick-card h4 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+
+.quick-card p { font-size: 13px; color: var(--text-gray); margin: 0; }
+
+/* ── STATISTICS ── */
+.stats-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, var(--navy) 0%, #0f2b6b 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; position: relative; z-index: 1; }
+
+.stat-item { text-align: center; }
+
+.stat-item .stat-number {
+  font-size: 42px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.stat-item .stat-label {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 400;
+}
+
+.stat-item .stat-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+
+/* ── FEATURES ── */
+.features { padding: 100px 0; background: var(--gray-bg); }
+
+.section-header { text-align: center; max-width: 640px; margin: 0 auto 56px; }
+
+.section-header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+
+.section-header p { font-size: 16px; color: var(--text-gray); line-height: 1.7; }
+
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.feature-card {
+  background: white;
+  border-radius: 20px;
+  padding: 36px 28px;
+  transition: all 0.3s ease;
+  border: 1px solid #f1f5f9;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+  border-color: #e2e8f0;
+}
+
+.feature-card .fc-icon {
+  width: 52px; height: 52px;
+  background: var(--light-blue);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  color: var(--blue);
+  margin-bottom: 18px;
+  transition: all 0.3s;
+}
+
+.feature-card:hover .fc-icon { background: var(--blue); color: white; }
+
+.feature-card h3 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+
+.feature-card p { font-size: 14px; color: var(--text-gray); line-height: 1.7; margin: 0; }
+
+/* ── DASHBOARD PREVIEW ── */
+.dashboard-preview { padding: 100px 0; background: var(--white); }
+
+.dashboard-preview .section-header { margin-bottom: 48px; }
+
+.dashboard-mockup {
+  background: var(--navy);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(11,31,77,0.2);
+  position: relative;
+}
+
+.dashboard-mockup .mockup-header {
+  background: rgba(255,255,255,0.05);
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.mockup-header .dots { display: flex; gap: 6px; }
+.mockup-header .dots span {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+.mockup-header .dots span:nth-child(1) { background: #ef4444; }
+.mockup-header .dots span:nth-child(2) { background: #eab308; }
+.mockup-header .dots span:nth-child(3) { background: #22c55e; }
+
+.mockup-header .mockup-title { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; }
+
+.mockup-body { padding: 32px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+
+.mockup-main { display: flex; flex-direction: column; gap: 20px; }
+
+.mockup-map {
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 20px;
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mockup-map::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(96,165,250,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.mockup-map-bar {
+  position: absolute;
+  bottom: 20px; left: 20px; right: 20px;
+  display: flex; gap: 6px; align-items: flex-end;
+}
+
+.mockup-map-bar span {
+  flex: 1;
+  background: rgba(96,165,250,0.3);
+  border-radius: 4px 4px 0 0;
+  height: var(--h);
+  transition: height 0.3s;
+}
+
+.mockup-map-label { position: absolute; top: 20px; left: 20px; color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 500; }
+
+.mockup-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+.mockup-stat {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.mockup-stat .ms-value { font-size: 22px; font-weight: 700; color: white; }
+.mockup-stat .ms-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.mockup-stat .ms-trend { font-size: 11px; font-weight: 600; }
+.mockup-stat .ms-trend.up { color: var(--success); }
+.mockup-stat .ms-trend.down { color: var(--error); }
+
+.mockup-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.mockup-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.mockup-card .mc-title { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 500; margin-bottom: 8px; }
+
+.mockup-card .mc-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.mockup-card .mc-item:last-child { border-bottom: none; }
+
+.mockup-card .mc-name { font-size: 13px; color: rgba(255,255,255,0.8); }
+.mockup-card .mc-value { font-size: 13px; font-weight: 600; color: white; }
+
+.mockup-card .mc-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; margin-top: 4px; overflow: hidden; }
+.mockup-card .mc-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--blue), var(--sky)); }
+
+.ai-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  background: rgba(96,165,250,0.15);
+  color: var(--sky);
+  border-radius: 100px;
+  font-size: 11px; font-weight: 600;
+}
+
+/* ── TESTIMONIALS ── */
+.testimonials { padding: 100px 0; background: var(--gray-bg); }
+
+.testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.testimonial-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.06); }
+
+.testimonial-card .stars { color: #f59e0b; font-size: 14px; margin-bottom: 12px; letter-spacing: 2px; }
+
+.testimonial-card blockquote {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0 0 20px;
+  font-style: italic;
+}
+
+.testimonial-card .author { display: flex; align-items: center; gap: 12px; }
+
+.testimonial-card .author-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--light-blue), var(--sky));
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue); font-weight: 700; font-size: 16px;
+}
+
+.testimonial-card .author-info strong { display: block; font-size: 14px; color: var(--navy); }
+.testimonial-card .author-info span { font-size: 13px; color: var(--text-gray); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--navy);
+  color: white;
+  padding: 60px 0 32px;
+}
+
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 40px; }
+
+.footer-brand .footer-logo {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+
+.footer-brand .footer-logo .logo-small {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+}
+
+.footer-brand p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 320px; }
+
+.footer h5 { font-size: 14px; font-weight: 700; color: white; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.footer ul { list-style: none; padding: 0; margin: 0; }
+
+.footer ul li { margin-bottom: 10px; }
+
+.footer ul li a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+
+.footer ul li a:hover { color: white; }
+
+.footer .social-links { display: flex; gap: 12px; margin-top: 16px; }
+
+.footer .social-links a {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 18px;
+}
+
+.footer .social-links a:hover { background: var(--blue); color: white; }
+
+.footer-bottom {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.footer-bottom p { font-size: 13px; color: rgba(255,255,255,0.4); margin: 0; }
+
+.footer-bottom-links { display: flex; gap: 20px; }
+
+.footer-bottom-links a { font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+.footer-bottom-links a:hover { color: white; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero h1 { font-size: 42px; }
+  .hero-image img { height: 360px; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .testimonial-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .mockup-body { grid-template-columns: 1fr; }
+  .account-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav-links, .nav-right .lang-selector, .nav-right .btn-login { display: none; }
+  .mobile-toggle { display: block; }
+  .hero { padding: 120px 0 60px; }
+  .hero h1 { font-size: 32px; }
+  .hero-sub { font-size: 16px; }
+  .hero-image img { height: 260px; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .stat-item .stat-number { font-size: 32px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .section-header h2 { font-size: 28px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .modal-content { padding: 32px 24px; }
+  .modal-title h2 { font-size: 24px; }
+  .hero-buttons { flex-direction: column; }
+  .hero-buttons a { text-align: center; justify-content: center; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}
+
+/* ── ANIMATIONS ── */
+.fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+.fade-in-left { opacity: 0; transform: translateX(-30px); transition: all 0.6s ease; }
+.fade-in-left.visible { opacity: 1; transform: translateX(0); }
+.fade-in-right { opacity: 0; transform: translateX(30px); transition: all 0.6s ease; }
+.fade-in-right.visible { opacity: 1; transform: translateX(0); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse { animation: pulse 2s infinite; }
+
+/* ── MOBILE NAV ── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 72px; left: 0; right: 0;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  z-index: 999;
+}
+
+.mobile-nav.open { display: block; }
+
+.mobile-nav a {
+  display: block;
+  padding: 12px 0;
+  color: #475569;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mobile-nav a:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAVIGATION ─── -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="/" class="navbar-brand">
+      <div class="logo-icon">E</div>
+      <div class="brand-text">
+        <span class="brand-name">Erinde</span>
+        <span class="brand-tagline">Smart Health Access for All</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="#features">Services</a></li>
+      <li><a href="/hospitals">Hospitals</a></li>
+      <li><a href="/queue/track">Queue Status</a></li>
+      <li><a href="#features">About</a></li>
+      <li><a href="#footer">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <div class="lang-selector">
+        <span>🌐</span>
+        <span>EN</span>
+        <span style="font-size:10px;color:#94a3b8;">▼</span>
+      </div>
+      <a href="/login" class="btn-login">Login</a>
+      <button class="btn-signup-nav" onclick="openModal()">Sign Up</button>
+      <button class="mobile-toggle" onclick="toggleMobileNav()">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="/">Home</a>
+  <a href="#features">Services</a>
+  <a href="/hospitals">Hospitals</a>
+  <a href="/queue/track">Queue Status</a>
+  <a href="#features">About</a>
+  <a href="#footer">Contact</a>
+  <a href="/login">Login</a>
+  <a href="#" onclick="openModal(); return false;">Sign Up</a>
+</div>
+
+<!-- ─── SIGN UP MODAL ─── -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">
+      <h2>Choose Your Account Type</h2>
+      <p>Select how you'll use Erinde to get started</p>
+    </div>
+    <div class="account-cards">
+      <div class="account-card">
+        <div class="card-icon">👤</div>
+        <h3>Patient</h3>
+        <p>Book appointments, pay hospital fees, receive queue updates, and manage your healthcare journey.</p>
+        <button class="card-btn patient-btn" onclick="location.href='/login'">Continue as Patient</button>
+      </div>
+      <div class="account-card">
+        <div class="card-icon">🩺</div>
+        <h3>Doctor</h3>
+        <p>Manage appointments, consult patients, monitor schedules, and access medical records.</p>
+        <button class="card-btn doctor-btn" onclick="location.href='/login'">Continue as Doctor</button>
+      </div>
+      <div class="account-card">
+        <div class="card-icon">🏥</div>
+        <h3>Hospital</h3>
+        <p>Manage queues, departments, staff, payments, and patient flow analytics.</p>
+        <button class="card-btn hospital-btn" onclick="location.href='/login'">Register Hospital</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="fade-in-left">
+        <div class="hero-badge">
+          <span class="flag">🇷🇼</span>
+          Rwanda National Digital Health Platform
+          <span class="dot"></span>
+        </div>
+        <h1>
+          Better Access.<br>
+          Shorter Waits.<br>
+          <span class="highlight">Healthier Rwanda.</span>
+        </h1>
+        <p class="hero-sub">
+          Erinde enables every citizen to book appointments, receive digital queue numbers, make secure payments, and access healthcare services efficiently through both smartphones and USSD.
+        </p>
+        <p class="hero-desc">
+          Designed for inclusivity and operational excellence, Erinde connects patients, hospitals, healthcare professionals, insurers, and the Ministry of Health into one intelligent digital ecosystem.
+        </p>
+        <div class="hero-buttons">
+          <a href="/login" class="btn-primary-lg">
+            <i class="bi bi-calendar-check"></i>
+            Book Appointment
+          </a>
+          <a href="#features" class="btn-secondary-lg">
+            <i class="bi bi-play-circle"></i>
+            How Erinde Works
+          </a>
+          <a href="/queue/track" class="btn-outline-lg">
+            <i class="bi bi-ui-checks"></i>
+            Check Queue Status
+          </a>
+        </div>
+      </div>
+      <div class="fade-in-right">
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=80" alt="Modern hospital reception with digital queue display">
+          <div class="image-overlay">
+            <p>🏥 Kigali University Teaching Hospital — Digital Queue Management System</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUICK SERVICE CARDS ─── -->
+<section class="quick-services">
+  <div class="container">
+    <div class="quick-grid">
+      <div class="quick-card fade-in">
+        <div class="qc-icon">📅</div>
+        <h4>Book Appointment</h4>
+        <p>Reserve appointments online or via USSD.</p>
+      </div>
+      <div class="quick-card fade-in">
+        <div class="qc-icon">🏥</div>
+        <h4>Find Hospitals</h4>
+        <p>Locate nearby hospitals and health centers.</p>
+      </div>
+      <div class="quick-card fade-in">
+        <div class="qc-icon">🔢</div>
+        <h4>Queue Status</h4>
+        <p>View live queue position and estimated waiting time.</p>
+      </div>
+      <div class="quick-card fade-in">
+        <div class="qc-icon">💳</div>
+        <h4>Secure Payments</h4>
+        <p>Pay using Mobile Money or bank services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATISTICS ─── -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item fade-in">
+        <span class="stat-icon">👨‍👩‍👧‍👦</span>
+        <div class="stat-number"><span class="counter" data-target="500000">0</span>+</div>
+        <div class="stat-label">Patients Served</div>
+      </div>
+      <div class="stat-item fade-in">
+        <span class="stat-icon">🏥</span>
+        <div class="stat-number"><span class="counter" data-target="450">0</span>+</div>
+        <div class="stat-label">Health Facilities Connected</div>
+      </div>
+      <div class="stat-item fade-in">
+        <span class="stat-icon">⏱️</span>
+        <div class="stat-number"><span class="counter" data-target="70">0</span>%</div>
+        <div class="stat-label">Average Waiting Time Reduction</div>
+      </div>
+      <div class="stat-item fade-in">
+        <span class="stat-icon">⚡</span>
+        <div class="stat-number"><span class="counter" data-target="99.9">0</span>%</div>
+        <div class="stat-label">System Availability</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>Everything You Need for Modern Healthcare</h2>
+      <p>Erinde provides a complete digital health infrastructure serving patients, providers, and policymakers.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="fc-icon">📅</div>
+        <h3>Smart Appointment Booking</h3>
+        <p>Book healthcare visits in minutes through web, mobile app, or USSD. Get instant confirmation and reminders.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="fc-icon">📊</div>
+        <h3>Real-Time Queue Tracking</h3>
+        <p>Monitor waiting times from anywhere. View live queue positions and estimated wait times for any hospital.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="fc-icon">📱</div>
+        <h3>USSD Accessibility</h3>
+        <p>Works on any mobile phone — no smartphone required. Dial *880# to book appointments and check queues.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="fc-icon">💳</div>
+        <h3>Mobile Money Payments</h3>
+        <p>Secure digital payments via MTN Mobile Money, Airtel Money, and bank integration. Pay hospital fees instantly.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="fc-icon">📋</div>
+        <h3>Hospital Management Dashboard</h3>
+        <p>Monitor queue flow, staff schedules, bed occupancy, and operational performance in real time.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="fc-icon">🧠</div>
+        <h3>National Health Intelligence</h3>
+        <p>Advanced analytics for healthcare planning, disease outbreak monitoring, and resource allocation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DASHBOARD PREVIEW ─── -->
+<section class="dashboard-preview">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>National Health Command Center</h2>
+      <p>Real-time insights for the Ministry of Health and hospital administrators.</p>
+    </div>
+    <div class="dashboard-mockup fade-in">
+      <div class="mockup-header">
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="mockup-title">Erinde — National Health Intelligence Dashboard</span>
+        <span class="ai-badge"><i class="bi bi-stars"></i> AI-Powered</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-main">
+          <div class="mockup-map">
+            <span class="mockup-map-label">📍 Live Patient Flow Map — Rwanda</span>
+            <div class="mockup-map-bar">
+              <span style="--h:60%"></span>
+              <span style="--h:80%"></span>
+              <span style="--h:40%"></span>
+              <span style="--h:90%"></span>
+              <span style="--h:55%"></span>
+              <span style="--h:70%"></span>
+              <span style="--h:45%"></span>
+              <span style="--h:75%"></span>
+              <span style="--h:60%"></span>
+              <span style="--h:85%"></span>
+              <span style="--h:50%"></span>
+              <span style="--h:65%"></span>
+            </div>
+          </div>
+          <div class="mockup-stats">
+            <div class="mockup-stat">
+              <div class="ms-value">24</div>
+              <div class="ms-label">Hospitals Online</div>
+              <div class="ms-trend up">↑ 3 new this month</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="ms-value">12,847</div>
+              <div class="ms-label">Patients in Queue</div>
+              <div class="ms-trend down">↓ 8% from last week</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="ms-value">18<span style="font-size:14px;font-weight:400;"> min</span></div>
+              <div class="ms-label">Avg. Wait Time</div>
+              <div class="ms-trend up">↓ 70% improvement</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="ms-value">RWF 42.8M</div>
+              <div class="ms-label">Daily Collections</div>
+              <div class="ms-trend up">↑ 12% vs yesterday</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-sidebar">
+          <div class="mockup-card">
+            <div class="mc-title">🏥 Hospital Congestion Levels</div>
+            <div class="mc-item">
+              <span class="mc-name">CHUK</span>
+              <span class="mc-value" style="color:#f59e0b;">82%</span>
+            </div>
+            <div class="mc-bar"><div class="mc-bar-fill" style="width:82%;background:linear-gradient(90deg,#f59e0b,#f97316);"></div></div>
+            <div class="mc-item">
+              <span class="mc-name">Kanombe</span>
+              <span class="mc-value" style="color:#ef4444;">94%</span>
+            </div>
+            <div class="mc-bar"><div class="mc-bar-fill" style="width:94%;background:linear-gradient(90deg,#ef4444,#dc2626);"></div></div>
+            <div class="mc-item">
+              <span class="mc-name">Kigali</span>
+              <span class="mc-value" style="color:#22c55e;">45%</span>
+            </div>
+            <div class="mc-bar"><div class="mc-bar-fill" style="width:45%;"></div></div>
+            <div class="mc-item">
+              <span class="mc-name">Butare</span>
+              <span class="mc-value" style="color:#22c55e;">38%</span>
+            </div>
+            <div class="mc-bar"><div class="mc-bar-fill" style="width:38%;"></div></div>
+          </div>
+          <div class="mockup-card">
+            <div class="mc-title">📈 Disease Trend Alerts</div>
+            <div class="mc-item"><span class="mc-name">Malaria</span><span class="mc-value" style="color:#f59e0b;">↑ 12%</span></div>
+            <div class="mc-item"><span class="mc-name">Respiratory</span><span class="mc-value" style="color:#22c55e;">↓ 5%</span></div>
+            <div class="mc-item"><span class="mc-name">Cholera</span><span class="mc-value" style="color:#ef4444;">⚠ Alert</span></div>
+            <div class="mc-item"><span class="mc-name">Maternal</span><span class="mc-value" style="color:#22c55e;">Stable</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section class="testimonials">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>Trusted by Healthcare Leaders</h2>
+      <p>Hear from the people using Erinde across Rwanda.</p>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card fade-in">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Erinde has transformed how I access healthcare. I can book appointments, pay via Mobile Money, and track my queue position — all from my phone. No more long waits at the hospital."</blockquote>
+        <div class="author">
+          <div class="author-avatar">JM</div>
+          <div class="author-info">
+            <strong>Jean Marie</strong>
+            <span>Patient, Kigali</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card fade-in">
+        <div class="stars">★★★★★</div>
+        <blockquote>"The real-time queue management and appointment scheduling have reduced overcrowding in our facility by 60%. Our staff can focus on patient care instead of manual paperwork."</blockquote>
+        <div class="author">
+          <div class="author-avatar">DU</div>
+          <div class="author-info">
+            <strong>Dr. Uwimana</strong>
+            <span>Physician, CHUK</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card fade-in">
+        <div class="stars">★★★★★</div>
+        <blockquote>"As a hospital administrator, the analytics dashboard gives me unprecedented visibility into our operations. We can make data-driven decisions that improve patient outcomes and staff efficiency."</blockquote>
+        <div class="author">
+          <div class="author-avatar">AK</div>
+          <div class="author-info">
+            <strong>Alice Kaliza</strong>
+            <span>Hospital Admin, Kanombe</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer" id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-small">E</div>
+          <div>
+            <div style="font-weight:700;font-size:18px;">Erinde</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Smart Health Access & Flow Infrastructure</div>
+          </div>
+        </div>
+        <p>Rwanda's national digital health platform connecting patients, healthcare providers, and the Ministry of Health for efficient, accessible healthcare delivery.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/hospitals">Hospitals</a></li>
+          <li><a href="/queue/track">Queue Status</a></li>
+          <li><a href="/book">Book Appointment</a></li>
+          <li><a href="/payment">Payments</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Support</h5>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">USSD Guide</a></li>
+          <li><a href="#">Mobile App</a></li>
+          <li><a href="#">API Documentation</a></li>
+          <li><a href="#">Report Issue</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Data Protection</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="#"><i class="bi bi-geo-alt"></i> Kigali, Rwanda</a></li>
+          <li><a href="#"><i class="bi bi-telephone"></i> +250 788 000 000</a></li>
+          <li><a href="#"><i class="bi bi-envelope"></i> info@erinde.rw</a></li>
+          <li><a href="#"><i class="bi bi-globe"></i> www.erinde.rw</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Erinde — National Smart Health Access & Flow Infrastructure. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Modal ──
+function openModal() { document.getElementById('signupModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal() { document.getElementById('signupModal').classList.remove('active'); document.body.style.overflow = ''; }
+document.getElementById('signupModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+// ── Mobile Nav ──
+function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+
+// ── Scroll Shadow ──
+window.addEventListener('scroll', function() {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 20) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+});
+
+// ── Scroll Animations ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => observer.observe(el));
+
+// ── Animated Counters ──
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const duration = 2000;
+      const startTime = performance.now();
+      const isDecimal = target % 1 !== 0;
+
+      function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = eased * target;
+        el.textContent = isDecimal ? current.toFixed(1) : Math.floor(current).toLocaleString();
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.textContent = isDecimal ? target.toFixed(1) : Math.floor(target).toLocaleString();
+      }
+      requestAnimationFrame(animate);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+// ── Close mobile nav on link click ──
+document.querySelectorAll('.mobile-nav a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('mobileNav').classList.remove('open'));
+});
+</script>
+
+</body>
+</html>

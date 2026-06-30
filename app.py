@@ -337,7 +337,7 @@ def api_doctors():
 @app.route("/")
 def home():
     if session.get("user"): return redirect("/dashboard")
-    return redirect("/login")
+    return render_template("index.html")
 
 @app.route("/mobile")
 def mobile_app():
