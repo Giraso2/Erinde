@@ -1,0 +1,38 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: { DEFAULT: '#0B1F4D', 50: '#e8edf5', 100: '#c5d1e8', 200: '#9eb2d9', 300: '#7793ca', 400: '#5a7bbf', 500: '#3d63b4', 600: '#2563EB', 700: '#0B1F4D', 800: '#091840', 900: '#071033' },
+        'primary-foreground': '#FFFFFF',
+        secondary: { DEFAULT: '#2563EB', 50: '#eef4ff', 100: '#dbe5ff', 200: '#b9ceff', 300: '#8eafff', 400: '#60A5FA', 500: '#3b82f6', 600: '#2563EB', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+        'secondary-foreground': '#FFFFFF',
+        surface: '#F8FAFC',
+        card: '#FFFFFF',
+        'card-foreground': '#0f172a',
+        muted: '#64748B',
+        'muted-foreground': '#64748B',
+        accent: '#F1F5F9',
+        'accent-foreground': '#0f172a',
+        destructive: '#DC2626',
+        'destructive-foreground': '#FFFFFF',
+        success: '#16A34A',
+        warning: '#F59E0B',
+        error: '#DC2626',
+        popover: '#FFFFFF',
+        'popover-foreground': '#0f172a',
+      },
+      borderRadius: { xl: '16px', '2xl': '20px', '3xl': '24px' },
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      boxShadow: { soft: '0 2px 15px -3px rgba(0,0,0,0.07), 0 10px 20px -2px rgba(0,0,0,0.04)', glass: '0 8px 32px rgba(0,0,0,0.08)' },
+    },
+  },
+  plugins: [require('tailwindcss-animate')],
+}
